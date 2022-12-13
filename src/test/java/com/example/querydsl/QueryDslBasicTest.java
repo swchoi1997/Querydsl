@@ -12,6 +12,8 @@ import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -256,6 +258,45 @@ public class QueryDslBasicTest {
         for (Tuple tuple : fetch1) {
             System.out.println("tuple = " + tuple);
         }
+    }
+
+    //fetch join
+    /*
+    연관된 테이블을 한번에 조회하는 것이다!!
+    주로 성능 최적화에서 사용하는 방법이다.
+     */
+
+    @PersistenceUnit
+    EntityManagerFactory emf;
+    @Test
+    public void fetchJoinNo() throws Exception{
+        em.flush();
+        em.clear();
+
+        Member findMember = queryFactory
+                .selectFrom(member)
+                .where(member.username.eq("member1"))
+                .fetchOne();
+
+        //객체가 이미 로딩된 엔티티인지 아직 로딩안된 엔티티인지 알려줌
+        boolean loaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
+        assertThat(loaded).as("패치 조인 미적용").isFalse();
+    }
+
+    @Test
+    public void fetchJoin() throws Exception{
+        em.flush();
+        em.clear();
+
+        Member findMember = queryFactory
+                .selectFrom(member)
+                .join(member.team, team).fetchJoin()
+                .where(member.username.eq("member1"))
+                .fetchOne();
+
+        //객체가 이미 로딩된 엔티티인지 아직 로딩안된 엔티티인지 알려줌
+        boolean loaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
+        assertThat(loaded).as("패치 조인 적용").isTrue();
     }
 
 }
