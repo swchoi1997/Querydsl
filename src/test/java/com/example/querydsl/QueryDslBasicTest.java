@@ -204,6 +204,7 @@ public class QueryDslBasicTest {
     }
 
     //join
+    //첫번째 파라이터에 조인 대상을 지정하고, 두번째 파라미터에 별칭으로 사용할 Q타입을 지정한다.
     @Test
     public void defaultJoin() throws Exception{
         List<Member> result = queryFactory
@@ -216,4 +217,45 @@ public class QueryDslBasicTest {
                 .extracting("username")
                 .containsExactly("member1", "member2");
     }
+
+    /*
+    join on절
+   1. 조인대상 필터링
+   2. 연관관계 없는 엔티티 외부조인
+     */
+    @Test
+    public void join_on_filtering() throws Exception{
+        //회원과 팀을 조인하면서 팀이름이 teamA인 팀만 조인, 회원은 모두조회
+        List<Tuple> result = queryFactory
+                .select(member, team)
+                .from(member)
+                .leftJoin(member.team, team).on(team.name.eq("teamA"))
+                .fetch();
+
+        for (Tuple tuple : result) {
+            System.out.println("tuple = " + tuple);
+        }
+
+        //inner join할 때는 on과 where join의 반환값이 같다 그러브로 그냥 where하자
+    }
+
+    @Test
+    public void join_on_no_relation() throws Exception{
+        //회원의이름과 팀의 이름이같은 사람 찾기
+        em.persist(new Member("teamA"));
+        em.persist(new Member("teamB"));
+        em.persist(new Member("teamC"));
+
+        List<Tuple> fetch1 = queryFactory
+                .select(member, team)
+                .from(member)
+                .leftJoin(team) // 엔티티가 하나만 들어간다는 것을 주의할것!!
+                .on(member.username.eq(team.name))
+                .fetch();
+
+        for (Tuple tuple : fetch1) {
+            System.out.println("tuple = " + tuple);
+        }
+    }
+
 }
