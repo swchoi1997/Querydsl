@@ -6,6 +6,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.filter;
 
 import com.example.querydsl.dto.MemberDto;
+import com.example.querydsl.dto.MemberDto2;
+import com.example.querydsl.dto.QMemberDto2;
 import com.example.querydsl.dto.UserDto;
 import com.example.querydsl.entity.Member;
 import com.example.querydsl.entity.QMember;
@@ -523,4 +525,19 @@ public class QueryDslBasicTest {
         }
     }
 
+    //프로젝션과 결과 반환 @QueryProjection
+    //컴파일 시점에 타입체크도 가능하다
+    //하지만, Q파일을 생성해야하고 DTO가 QueryDsl에 대한 라이브러리 의존성이 생겨버린다
+
+    @Test
+    public void findDtoByQueryProjection(){
+        List<MemberDto2> result = queryFactory
+                .select(new QMemberDto2(member.username, member.age))
+                .from(member)
+                .fetch();
+        for (MemberDto2 memberDto2 : result) {
+            System.out.println("memberDto2 = " + memberDto2);
+        }
+
+    }
 }
