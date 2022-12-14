@@ -29,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -618,6 +619,41 @@ public class QueryDslBasicTest {
 
     private BooleanExpression allEq(String usernameCond, Integer ageCond) {
         return member.username.eq(usernameCond).and(member.age.eq(ageCond));
+    }
+
+    //수정 삭제 벌크 쿼리
+    //벌크 연산은 디비에 바로 쿼리가 날라가서 영속성컨텍스트랑 상태가 다르다..
+    //
+    @Test
+    public void bulkUpdate(){
+        //영향을 받은 low수가 나옴
+        long count = queryFactory
+                .update(member)
+                .set(member.username, "비회원")
+                .where(member.age.lt(28))
+                .execute();
+        em.flush();
+        em.clear();
+        List<Member> fetch = queryFactory.selectFrom(member).fetch();
+        for (Member fetch1 : fetch) {
+            System.out.println("fetch1 = " + fetch1);
+        }
+    }
+
+    @Test
+    public void bulkAdd(){
+        queryFactory
+                .update(member)
+                .set(member.age, member.age.add(1))
+                .execute();
+    }
+
+    @Test
+    public void bulkDelete(){
+        queryFactory
+                .delete(member)
+                .where(member.age.eq(10))
+                .execute();
     }
 
 }
