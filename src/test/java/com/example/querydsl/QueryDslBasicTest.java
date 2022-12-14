@@ -410,4 +410,18 @@ public class QueryDslBasicTest {
         }
     }
 
+    @Test
+    public void concat(){
+
+        //enum조회 시 stringValue쓰임
+        List<String> fetch = queryFactory
+                .select(member.username.concat("_").concat(member.age.stringValue()))
+                .from(member)
+                .where(member.username.eq("member1"))
+                .fetch();
+        for (String s : fetch) {
+            System.out.println("s = " + s);
+        }
+    }
+
 }
