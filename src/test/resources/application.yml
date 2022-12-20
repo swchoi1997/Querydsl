@@ -3,7 +3,7 @@ server:
 
 spring:
   profiles:
-    active: local
+    active: test
   h2:
     console:
       enabled: true
@@ -12,7 +12,7 @@ spring:
       path: /h2-console
 
   datasource:
-    url: jdbc:h2:mem:queryDsl
+    url: jdbc:h2:mem:queryDslTest
     driver-class-name: org.h2.Driver
     username: sa
 
